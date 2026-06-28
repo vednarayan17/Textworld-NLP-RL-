@@ -1,0 +1,39 @@
+environment:
+  game_path: "games/game.ulx"          # path to the .ulx game file
+  max_steps: 50                         # max steps per episode
+
+state_manager:
+  window_size: 3                        # rolling window of (action, obs) pairs
+
+llm:
+  backend: "ollama"                     # "ollama" | "huggingface" | "mock"
+  model_name: "llama3"                  # ollama: "llama3", hf: "meta-llama/Meta-Llama-3-8B-Instruct"
+  ollama_url: "http://localhost:11434"  # Ollama server URL
+  k_candidates: 5                       # number of candidate actions to generate
+  max_retries: 3                        # retries on LLM parse failure
+  temperature: 0.1                      # low temp for more deterministic candidate selection
+  hf_load_in_4bit: true                 # 4-bit quantization for HuggingFace backend
+
+drrn:
+  sentence_model: "all-MiniLM-L6-v2"   # frozen sentence transformer
+  projection_dim: 128                   # output dim of trainable projection layer
+
+training:
+  num_episodes: 500
+  batch_size: 32
+  gamma: 0.9                            # discount factor
+  epsilon_start: 1.0
+  epsilon_end: 0.05
+  epsilon_decay: 0.995                  # per-episode multiplicative decay
+  learning_rate: 1.0e-4
+  replay_buffer_capacity: 10000
+  min_replay_size: 500                  # fill buffer before first update
+  target_update_freq: 100              # steps between target network syncs
+  grad_clip_norm: 1.0
+  checkpoint_dir: "checkpoints"
+  checkpoint_freq: 50                   # save every N episodes
+  log_freq: 10                          # print stats every N episodes
+
+evaluation:
+  num_episodes: 20
+  checkpoint_path: "checkpoints/best.pt"
